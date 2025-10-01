@@ -3,19 +3,18 @@
 balance=false
 terse=false
 search=false
-query=""
 lim=5
 
 help=false
 
-while getopts 'bq:tsl:h' flag; do
+while getopts 'btsl:h' flag; do
   case $flag in
     b)
       balance=true
       ;;
-    q)
-      query=$OPTARG
-      ;;
+    # q)
+    #   query=$OPTARG
+    #   ;;
     l)
       lim=$OPTARG
       ;;
@@ -43,7 +42,6 @@ if [ "$help" = true ]; then
   echo "Usage: $0 [options] [query]"
   echo "Options:"
   echo "  -b                  Show balance"
-  echo "  -q \"...\"            Query to search for"
   echo "  -t                  terse, append \"make it short and sweet\" for fastgpt"
   echo "  -l 5                Limit number of results from search api (default 5)"
   echo "  -s                  Use search api instead of fastgpt"
@@ -55,7 +53,8 @@ fi
 shift $((OPTIND - 1))
 
 # The remaining arguments are now in the array "$@"
-remaining_args=("$@")
+query="$@"
+
 
 if [ "$balance" = true ]; then
   export SHOW_BALANCE=true

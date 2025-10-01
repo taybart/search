@@ -36,7 +36,7 @@ request "search" {
         local snippet = d.snippet:gsub("&#39;", "'"):gsub("&quot;", '"')
 
         print(('[%d] %s'):format(i, co.hyperlink(d.url, d.title, cu.blue)))
-        print(('[%d] %s'):format(i, snippet))
+        print('\t'..snippet)
       end
     end
   LUA
