@@ -1,8 +1,5 @@
 #!/usr/bin/env zsh
 
-export AUTH_TOKEN=$(cat ~/.kagi/auth)
-
-
 balance=false
 terse=false
 search=false
@@ -81,7 +78,7 @@ fi
 
 # check if we have https://github.com/taybart/spinner
 local sp=spinner
-if ! command -v spin &> /dev/null; then
+if ! command -v spinner &> /dev/null; then
   sp=''
 fi
 
