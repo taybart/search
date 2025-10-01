@@ -16,7 +16,7 @@ Options:
 $ search -s -l 2 ken thompson
 -> ken thompson
 
-[1] Ken Thompson - Wikipedia
+[1] Ken Thompson - Wikipedia <- (these are hyperlinks using OSC 8)
     Kenneth Lane Thompson (born February 4, 1943) is an American pioneer of computer science. Thompson worked at Bell Labs for most of his career.
 [2] Ken Thompson - UNIX memoir, in first person - YouTube
     UNIX memoir, in first person - Ken Thompson · Comments. 44. There's a special room in heaven with a sign above the door that says "Dennis and ...
