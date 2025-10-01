@@ -46,7 +46,7 @@ if [ "$help" = true ]; then
   echo "Usage: $0 [options] [query]"
   echo "Options:"
   echo "  -b                  Show balance"
-  echo "  -q \"...\"          Query to search for"
+  echo "  -q \"...\"            Query to search for"
   echo "  -t                  terse, append \"keep it short and sweet\" for gpt"
   echo "  -l 5                Limit number of results from search api (default 5)"
   echo "  -s                  Use search api instead of fastgpt"
