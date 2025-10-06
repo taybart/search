@@ -23,7 +23,7 @@ $ search -s -l 2 ken thompson
 
 $ search -t what was ken thompons best piece of software
 
--> what was ken thompons best piece of software please make it short and sweet
+-> what was ken thompsons most impactful piece of software please make it short and sweet
 
 Ken Thompson's most impactful piece of software is widely considered to be Unix, which he co-created. [1]
 
