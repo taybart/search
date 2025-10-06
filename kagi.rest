@@ -1,17 +1,11 @@
-request "search" {
-  url = "https://kagi.com/api/v0/search"
-  headers = {
-    "Authorization" = "Bot ${trim(read("~/.kagi/auth"))}"
-  }
-  query = {
-    q = "${env("QUERY")}"
-    limit = "${env("LIMIT")}"
-  }
-  post_hook = <<LUA
+locals {
+  api = "https://kagi.com/api/v0"
+
+
+  boilerplate = <<LUA
     local co = colors
     local cu = co.underlined
 
-    -- query
     print(co.f(
       {co.green, co.bold.e, cu.e}, 
       ('-> %s\n'):format(os.getenv("QUERY"))))
@@ -21,13 +15,26 @@ request "search" {
       print(inspect(rest.res.body))
       return
     end
-
     local body = json.decode(rest.res.body)
+
 
     if os.getenv("SHOW_BALANCE") == "true" then
       print(('%sapi balance: (%.2f)%s\n'):format(
         cu.red, body.meta.api_balance, co.reset))
     end
+  LUA
+}
+request "search" {
+  url = "${locals.api}/search"
+  headers = {
+    "Authorization" = "Bot ${trim(read("~/.kagi/auth"))}"
+  }
+  query = {
+    q = "${env("QUERY")}"
+    limit = "${env("LIMIT")}"
+  }
+  post_hook = <<LUA
+    ${locals.boilerplate}
 
     for i, d in ipairs(body.data) do
       if d.t == 0 then
@@ -44,7 +51,7 @@ request "search" {
 
 
 request "fastgpt" {
-  url = "https://kagi.com/api/v0/fastgpt"
+  url = "${locals.api}/fastgpt"
   method = "POST"
   headers = {
     "Authorization" = "Bot ${trim(read("~/.kagi/auth"))}"
@@ -55,26 +62,7 @@ request "fastgpt" {
     cache: true
   }
   post_hook = <<LUA
-    local co = colors
-    local cu = co.underlined
-
-    -- query
-    print(co.f(
-      {co.green, co.bold.e, cu.e}, 
-      ('-> %s\n'):format(os.getenv("QUERY"))))
-
-    if rest.res.status ~= 200 then
-      fail("bad response from kagi")
-      print(inspect(rest.res.body))
-      return
-    end
-    local body = json.decode(rest.res.body)
-
-
-    if os.getenv("SHOW_BALANCE") == "true" then
-      print(('%sapi balance: (%.2f)%s\n'):format(
-        cu.red, body.meta.api_balance, co.reset))
-    end
+    ${locals.boilerplate}
 
     local output = body.data.output
     :gsub('【', '[')
