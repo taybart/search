@@ -1,6 +1,6 @@
 locals {
   api = "https://kagi.com/api/v0"
-
+  auth = "Bot ${trim(read("~/.kagi/auth"))}"
 
   boilerplate = <<LUA
     local co = colors
@@ -15,8 +15,8 @@ locals {
       print(inspect(rest.res.body))
       return
     end
-    local body = json.decode(rest.res.body)
 
+    local body = json.decode(rest.res.body)
 
     if os.getenv("SHOW_BALANCE") == "true" then
       print(('%sapi balance: (%.2f)%s\n'):format(
@@ -24,10 +24,11 @@ locals {
     end
   LUA
 }
+
 request "search" {
   url = "${locals.api}/search"
   headers = {
-    "Authorization" = "Bot ${trim(read("~/.kagi/auth"))}"
+    "Authorization" = locals.auth
   }
   query = {
     q = "${env("QUERY")}"
@@ -54,7 +55,7 @@ request "fastgpt" {
   url = "${locals.api}/fastgpt"
   method = "POST"
   headers = {
-    "Authorization" = "Bot ${trim(read("~/.kagi/auth"))}"
+    "Authorization" = locals.auth
     "Content-Type" = "application/json"
   }
   body = {
