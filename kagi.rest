@@ -34,7 +34,7 @@ request "search" {
     q = "${env("QUERY")}"
     limit = "${env("LIMIT")}"
   }
-  post_hook = <<LUA
+  after = <<LUA
     ${locals.boilerplate}
 
     for i, d in ipairs(body.data) do
@@ -62,7 +62,7 @@ request "fastgpt" {
     query: "${env("QUERY")}",
     cache: true
   }
-  post_hook = <<LUA
+  after = <<LUA
     ${locals.boilerplate}
 
     local output = body.data.output
