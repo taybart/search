@@ -1,5 +1,50 @@
+#!/usr/bin/env rest
+
+config { no_flags = true }
+
+cli {
+  flags = {
+    balance = {
+      desc  = "Show balance when displaying results"
+      short = "b"
+      bool  = true
+    }
+    terse = {
+      desc  = "Terse, append \"make it short and sweet\" for fastgpt"
+      short = "t"
+      bool  = true
+    }
+    limit = {
+      desc    = "Terse, append \"make it short and sweet\" for fastgpt"
+      short   = "l"
+      default = "5"
+    }
+    search = {
+      desc  = "Use search api instead of fastgpt"
+      short = "s"
+      bool  = true
+    }
+  }
+  fn = <<LUA
+    if #cli.rest == 0 then
+      error("no query provided")
+    end
+    rest.exports.query = cli.rest:string()
+    rest.exports.limit = cli.limit
+    rest.exports.balance = cli.balance
+    if cli.terse then
+      rest.exports.query = cli.rest:string().." make it short and sweet"
+    end
+    if cli.search then
+      return rest.label("search")
+    end
+
+    rest.label("fastgpt")
+  LUA
+}
+
 locals {
-  api = "https://kagi.com/api/v0"
+  api  = "https://kagi.com/api/v0"
   auth = "Bot ${trim(read("~/.kagi/auth"))}"
 
   boilerplate = <<LUA
@@ -8,7 +53,7 @@ locals {
 
     print(co.f(
       {co.green, co.bold.e, cu.e}, 
-      ('-> %s\n'):format(os.getenv("QUERY"))))
+      ('-> %s\n'):format(rest.exports.query or os.getenv("QUERY"))))
 
     if rest.res.status ~= 200 then
       fail("bad response from kagi")
@@ -18,21 +63,20 @@ locals {
 
     local body = json.decode(rest.res.body)
 
-    if os.getenv("SHOW_BALANCE") == "true" then
+    if rest.exports.balance then
       print(('%sapi balance: (%.2f)%s\n'):format(
         cu.red, body.meta.api_balance, co.reset))
     end
   LUA
 }
-
 request "search" {
   url = "${locals.api}/search"
   headers = {
     "Authorization" = locals.auth
   }
   query = {
-    q = "${env("QUERY")}"
-    limit = "${env("LIMIT")}"
+    q     = try_exports("query", env("QUERY"))
+    limit = try_exports("limit", env("LIMIT"))
   }
   after = <<LUA
     ${locals.boilerplate}
@@ -52,15 +96,15 @@ request "search" {
 
 
 request "fastgpt" {
-  url = "${locals.api}/fastgpt"
+  url    = "${locals.api}/fastgpt"
   method = "POST"
   headers = {
     "Authorization" = locals.auth
-    "Content-Type" = "application/json"
+    "Content-Type"  = "application/json"
   }
   body = {
-    query: "${env("QUERY")}",
-    cache: true
+    query : try_exports("query", env("QUERY"))
+    cache : true
   }
   after = <<LUA
     ${locals.boilerplate}

@@ -1,0 +1,89 @@
+#!/usr/bin/env zsh
+
+balance=false
+terse=false
+search=false
+lim=5
+
+help=false
+
+while getopts 'btsl:h' flag; do
+  case $flag in
+    b)
+      balance=true
+      ;;
+    # q)
+    #   query=$OPTARG
+    #   ;;
+    l)
+      lim=$OPTARG
+      ;;
+    t)
+      terse=true
+      ;;
+    s)
+      search=true
+      ;;
+    h)
+      help=true
+      ;;
+    \?)
+      echo "Invalid option: -$OPTARG" >&2
+      exit 1
+      ;;
+    :)
+      echo "Option -$OPTARG requires an argument." >&2
+      exit 1
+      ;;
+  esac
+done
+
+if [ "$help" = true ]; then
+  echo "Usage: $0 [options] [query]"
+  echo "Options:"
+  echo "  -b                  Show balance"
+  echo "  -t                  terse, append \"make it short and sweet\" for fastgpt"
+  echo "  -l 5                Limit number of results from search api (default 5)"
+  echo "  -s                  Use search api instead of fastgpt"
+  echo "  -h                  Show help"
+  exit 0
+fi
+
+# Shift the arguments to remove the parsed options
+shift $((OPTIND - 1))
+
+# The remaining arguments are now in the array "$@"
+query="$@"
+
+
+if [ "$balance" = true ]; then
+  export SHOW_BALANCE=true
+fi
+
+if [ "$query" = "" ]; then
+  query=$(gum input --prompt="query: ")
+fi
+if [ "$terse" = true ]; then
+  query="${query} please make it short and sweet"
+fi
+
+export LIMIT=$lim
+
+
+export QUERY=$query
+if [ -z "$QUERY" ]; then
+  exit 1
+fi
+
+# check if we have https://github.com/taybart/spinner
+local sp=spinner
+if ! command -v spinner &> /dev/null; then
+  sp=''
+fi
+
+if [ "$search" = true ]; then
+  # check if spinner is installed
+  $sp rest -f $HOME/.kagi/kagi.rest -l search
+  return
+fi
+$sp rest -f $HOME/.kagi/kagi.rest -l fastgpt
